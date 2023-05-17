@@ -2,10 +2,24 @@ using GameShopWebAPI.Data;
 using GameShopWebAPI.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Reflection.Metadata.Ecma335;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<GameDBContext>(opt => opt.UseInMemoryDatabase("GameDb"));
+
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy( name: MyAllowSpecificOrigins, policy =>
+    {
+         policy.WithOrigins("http://localhost:41763")
+       // policy.AllowAnyOrigin()
+        .AllowAnyHeader()
+        .AllowAnyMethod();
+    });
+});
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -21,12 +35,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapGet("/games", async (GameDBContext db) => await db.Games.ToListAsync());
+//get all games
+app.MapGet("/games", async (GameDBContext db) => Results.Ok(await db.Games.ToListAsync()));
 
 app.MapGet("/games/{id}", async (GameDBContext db, int id) =>
     await db.Games.FindAsync(id)
     is Game game ? Results.Ok(game) : Results.NotFound());
 
+
+//add game
 app.MapPost("/games", async (GameDBContext db, Game game) => 
 {
     db.Games.Add(game);
@@ -35,6 +52,7 @@ app.MapPost("/games", async (GameDBContext db, Game game) =>
     return Results.Created($"/game/{game.Id}", game);
 });
 
+//get specific game
 app.MapPut("/games/{id}", async (GameDBContext db, Game game, int id) =>
 {
     var oldGame = await db.Games.FindAsync(id);
@@ -53,7 +71,7 @@ app.MapPut("/games/{id}", async (GameDBContext db, Game game, int id) =>
     }
 });
 
-
+//delete a game
 app.MapDelete("/games/{id}", async (GameDBContext db, int id) =>
 {
     if(await db.Games.FindAsync(id) is Game game)
@@ -66,5 +84,6 @@ app.MapDelete("/games/{id}", async (GameDBContext db, int id) =>
     
 });
 
+app.UseCors(MyAllowSpecificOrigins);
 app.Run();
 
