@@ -1,9 +1,10 @@
 ﻿using GameShopWebAPI.Model;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace GameShopWebAPI.Data
 {
-    public class GameDBContext : DbContext
+    public class GameDBContext : IdentityDbContext<ApplicationUser>
     {
         public GameDBContext() 
         {
