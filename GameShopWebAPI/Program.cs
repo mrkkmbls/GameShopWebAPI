@@ -1,3 +1,4 @@
+using GameShopWebAPI.CustomMiddleware;
 using GameShopWebAPI.Data;
 using GameShopWebAPI.Model;
 using Microsoft.EntityFrameworkCore;
@@ -85,5 +86,9 @@ app.MapDelete("/games/{id}", async (GameDBContext db, int id) =>
 });
 
 app.UseCors(MyAllowSpecificOrigins);
+
+//has a valid api key if it is valid then allow, else 
+app.UseMiddleware<ApiKeyAuthMiddleware>();
+
 app.Run();
 
