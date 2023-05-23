@@ -106,7 +106,7 @@ app.MapPost("/games", async (GameDBContext db, Game game) =>
     await db.SaveChangesAsync();
 
     return Results.Created($"/game/{game.Id}", game);
-});
+}).RequireAuthorization("admin_greetings"); //add authorization where u need to input a JWT token to open the data
 
 //get specific game
 app.MapPut("/games/{id}", async (GameDBContext db, Game game, int id) =>
@@ -182,7 +182,6 @@ app.MapPost("/login", async (GameDBContext db, SignInManager<ApplicationUser> si
 });
 
 app.UseCors(MyAllowSpecificOrigins);
-
 
 app.UseMiddleware<ApiKeyAuthMiddleware>();
 
